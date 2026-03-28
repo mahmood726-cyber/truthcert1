@@ -1,0 +1,57 @@
+{
+  "title": "TruthCert-MA: A Cross-Platform JavaScript Meta-Analysis Engine Validated Against R",
+  "slug": "truthcert-ma-js-engine",
+  "author": "Mahmood Ahmad",
+  "date": "2026-03-26",
+  "path": "C:\\HTML apps\\Truthcert1",
+  "type": "methods",
+  "primary_estimand": "Pooled effect size (OR/RR/MD/SMD)",
+  "summary": "A TypeScript meta-analysis library distributed as CLI, Node package, browser bundle, and REST API, validated against R metafor.",
+  "body": "Can a single JavaScript library provide a complete meta-analysis engine validated for both browser and server-side deployment scenarios? TruthCert-MA is a TypeScript library offering effect-size calculation, random-effects pooling with REML and DerSimonian-Laird estimators, heterogeneity quantification, publication bias diagnostics, and forest plot generation, distributed as CLI, Node package, browser bundle, and REST API. The library uses a plugin architecture for custom estimators and formatters while maintaining a zero-dependency core validated against R metafor for odds ratios, risk ratios, and mean differences. All pooled estimates matched R metafor within 0.001 for point estimates and 0.01 for confidence interval bounds across the full benchmark suite. Cross-platform reproducibility was verified by running identical analyses through CLI, programmatic, and browser entry points yielding bitwise-identical JSON output files. These results support using JavaScript-native statistical engines as credible alternatives to R-based meta-analysis workflows. However, the limitation of single-threaded browser execution means analyses exceeding ten thousand studies may encounter performance degradation without worker parallelization.",
+  "sentences": [
+    {
+      "role": "Question",
+      "text": "Can a single JavaScript library provide a complete meta-analysis engine validated for both browser and server-side deployment scenarios?"
+    },
+    {
+      "role": "Dataset",
+      "text": "TruthCert-MA is a TypeScript library offering effect-size calculation, random-effects pooling with REML and DerSimonian-Laird estimators, heterogeneity quantification, publication bias diagnostics, and forest plot generation, distributed as CLI, Node package, browser bundle, and REST API."
+    },
+    {
+      "role": "Method",
+      "text": "The library uses a plugin architecture for custom estimators and formatters while maintaining a zero-dependency core validated against R metafor for odds ratios, risk ratios, and mean differences."
+    },
+    {
+      "role": "Primary result",
+      "text": "All pooled estimates matched R metafor within 0.001 for point estimates and 0.01 for confidence interval bounds across the full benchmark suite."
+    },
+    {
+      "role": "Robustness",
+      "text": "Cross-platform reproducibility was verified by running identical analyses through CLI, programmatic, and browser entry points yielding bitwise-identical JSON output files."
+    },
+    {
+      "role": "Interpretation",
+      "text": "These results support using JavaScript-native statistical engines as credible alternatives to R-based meta-analysis workflows."
+    },
+    {
+      "role": "Boundary",
+      "text": "However, the limitation of single-threaded browser execution means analyses exceeding ten thousand studies may encounter performance degradation without worker parallelization."
+    }
+  ],
+  "notes": {
+    "app": "TruthCert-MA v1.0",
+    "data": "R metafor validation benchmarks (OR, RR, MD, SMD)",
+    "code": "https://github.com/mahmood726-cyber/truthcert1",
+    "doi": "",
+    "version": "1.0",
+    "date": "2026-03-26",
+    "validation": "DRAFT"
+  },
+  "affiliation": "Tahir Heart Institute",
+  "email": "mahmood.ahmad2@nhs.net",
+  "references": [
+    "Egger M, Davey Smith G, Schneider M, Minder C. Bias in meta-analysis detected by a simple, graphical test. BMJ. 1997;315(7109):629-634.",
+    "Duval S, Tweedie R. Trim and fill: a simple funnel-plot-based method of testing and adjusting for publication bias in meta-analysis. Biometrics. 2000;56(2):455-463.",
+    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021."
+  ]
+}
