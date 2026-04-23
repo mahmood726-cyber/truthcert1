@@ -1,22 +1,61 @@
 #!/usr/bin/env python3
 """
-Script to update the renderForestPlot function with improved visualization
+Patch a TruthCert HTML artifact with the improved forest-plot renderer.
+
+Usage:
+  python update_forest_plot.py
+  python update_forest_plot.py path/to/artifact.html
 """
 
+from __future__ import annotations
+
 import re
+import sys
+from pathlib import Path
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+DEFAULT_CANDIDATES = [
+    "TruthCert-PairwisePro-v1.0-production.html",
+    "TruthCert_v8-8-2_S14HTA_v1_4_2_FIXED2.html",
+    "TruthCert-PairwisePro-v1.0-bundle.html",
+]
+
+
+def resolve_target(argv: list[str]) -> Path:
+    if len(argv) > 1:
+        path = Path(argv[1]).expanduser()
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+        if not path.is_file():
+            raise FileNotFoundError(f"Target HTML not found: {path}")
+        return path
+
+    for candidate_name in DEFAULT_CANDIDATES:
+        candidate = PROJECT_ROOT / candidate_name
+        if candidate.is_file():
+            return candidate
+
+    html_files = sorted(PROJECT_ROOT.glob("*.html"))
+    if html_files:
+        return html_files[0]
+
+    raise FileNotFoundError(f"No HTML artifacts found under {PROJECT_ROOT}")
+
+
+TARGET_HTML = resolve_target(sys.argv)
 
 # Read the HTML file
-with open(r'C:\Truthcert1\truthcert_v8-8-0_with_S14-HTA.html', 'r', encoding='utf-8') as f:
-    content = f.read()
+content = TARGET_HTML.read_text(encoding="utf-8")
 
 # Define the old function body (the part we want to replace)
-old_pattern = r'''    const trace = \{ type: 'scatter', mode: 'markers', x, y, error_x: \{ type: 'data', symmetric: false, array: error_x\.map\(e => e\.hi\), arrayminus: error_x\.map\(e => e\.lo\), color: PLOT_COLORS\.teal, thickness: 2\.5 \}, marker: \{ size: 10, color: PLOT_COLORS\.teal \} \};
+old_pattern = r"""    const trace = \{ type: 'scatter', mode: 'markers', x, y, error_x: \{ type: 'data', symmetric: false, array: error_x\.map\(e => e\.hi\), arrayminus: error_x\.map\(e => e\.lo\), color: PLOT_COLORS\.teal, thickness: 2\.5 \}, marker: \{ size: 10, color: PLOT_COLORS\.teal \} \};
     const pooledLine = \{ type: 'scatter', mode: 'lines', x: \[transform\(pooled\.effect\), transform\(pooled\.effect\)\], y: \[y\[0\], y\[y\.length - 1\]\], line: \{ color: PLOT_COLORS\.purple, width: 2\.5, dash: 'dash' \}, name: 'Pooled Effect' \};
     const nullLine = \{ type: 'scatter', mode: 'lines', x: \[exp \? 1 : 0, exp \? 1 : 0\], y: \[y\[0\], y\[y\.length - 1\]\], line: \{ color: PLOT_COLORS\.darkGray, width: 1\.5, dash: 'dot' \}, name: 'Null Effect' \};
-    Plotly\.newPlot\('forest-plot', \[trace, pooledLine, nullLine\], \{ \.\.\.plotLayout, xaxis: \{ \.\.\.plotLayout\.xaxis, title: C\.measure \}, yaxis: \{ \.\.\.plotLayout\.yaxis, automargin: true \} \}, \{ responsive: true \}\);'''
+    Plotly\.newPlot\('forest-plot', \[trace, pooledLine, nullLine\], \{ \.\.\.plotLayout, xaxis: \{ \.\.\.plotLayout\.xaxis, title: C\.measure \}, yaxis: \{ \.\.\.plotLayout\.yaxis, automargin: true \} \}, \{ responsive: true \}\);"""
 
 # Define the new function body
-new_code = '''    // Calculate study weights (proportional to 1/variance)
+new_code = """    // Calculate study weights (proportional to 1/variance)
     const weights = R.studies.map(s => 1 / (s.se * s.se));
     const maxWeight = Math.max(...weights);
     const minWeight = Math.min(...weights);
@@ -157,7 +196,7 @@ new_code = '''    // Calculate study weights (proportional to 1/variance)
         showlegend: true
     };
 
-    Plotly.newPlot('forest-plot', [trace, diamondTrace, nullLine, legendTrace1, legendTrace2], layout, { responsive: true });'''
+    Plotly.newPlot('forest-plot', [trace, diamondTrace, nullLine, legendTrace1, legendTrace2], layout, { responsive: true });"""
 
 # Try to find and replace using regex
 if re.search(old_pattern, content):
@@ -176,13 +215,12 @@ else:
     else:
         print("ERROR: Could not find the target code to replace")
         print("Looking for renderForestPlot function...")
-        if 'function renderForestPlot()' in content:
+        if "function renderForestPlot()" in content:
             print("Function found in file!")
         else:
             print("Function NOT found!")
 
 # Write the updated content back
-with open(r'C:\Truthcert1\truthcert_v8-8-0_with_S14-HTA.html', 'w', encoding='utf-8') as f:
-    f.write(content)
+TARGET_HTML.write_text(content, encoding="utf-8")
 
-print("File updated successfully!")
+print(f"File updated successfully: {TARGET_HTML}")
