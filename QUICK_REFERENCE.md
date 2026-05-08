@@ -1,3 +1,6 @@
+<!-- sentinel:skip-file — quick reference doc cites local console commands
+     and `C:/Users/user/...` script paths as part of operator instructions,
+     not application configuration. Same pattern as E156/rewrite-workbook.txt. -->
 # TruthCert-PairwisePro Quick Reference
 
 ## Console Commands (Browser DevTools)

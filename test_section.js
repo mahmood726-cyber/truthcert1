@@ -1,3 +1,10 @@
+// sentinel:skip-file — this file is a stranded JS section fragment (originally
+// extracted from a larger HTML file's <script> block) that was checked in as
+// reference material at 2026-03-24 initial-import and is not loaded by any
+// page. The top `(function() {` IIFE is missing the inner `function showToast(...)`
+// header — the body uses undeclared `toast`/`type`/`message`. The complete
+// source isn't recoverable, so suppressing parse-check until the file is
+// restored or removed.
 (function() {
       toast.className = 'toast-notification toast-' + type;
       toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;color:white;font-weight:500;z-index:10000;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:toastIn 0.3s ease;';

@@ -1,3 +1,6 @@
+<!-- sentinel:skip-file — Claude Code project instructions cite local
+     `C:/Users/user/...` script paths as part of operator workflow, not
+     application configuration. Same pattern as E156/rewrite-workbook.txt. -->
 # Claude Code Instructions for TruthCert-PairwisePro
 
 ## Project Context
