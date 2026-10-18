@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build:min": "terser app.js --format comments=false -o app.min.js"
+  },
   "devDependencies": {
     "terser": "^5.44.1"
   }

@@ -6,22 +6,11 @@ Converts markdown files to DOCX and PDF, creates ZIP archive, and placeholder fi
 import os
 import re
 import zipfile
+import tempfile
 from pathlib import Path
 
-# Document conversion libraries
-from docx import Document
-from docx.shared import Inches, Pt, Cm
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.style import WD_STYLE_TYPE
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
-
-from fpdf import FPDF
-from PIL import Image, ImageDraw, ImageFont
-
-# Base directory
-BASE_DIR = Path(r"C:\Truthcert1\PLOS_ONE_Submission")
+# Optional document/image dependencies are loaded only by their converters.
+BASE_DIR = Path(__file__).resolve().parent
 
 def clean_markdown(text):
     """Remove markdown formatting symbols"""
@@ -56,6 +45,7 @@ def parse_markdown_table(table_text):
 
 def add_table_to_doc(doc, table_data):
     """Add a formatted table to a Word document"""
+    from docx.enum.table import WD_TABLE_ALIGNMENT
     if not table_data or len(table_data) < 1:
         return
 
@@ -78,6 +68,8 @@ def add_table_to_doc(doc, table_data):
 
 def convert_md_to_docx(md_path, docx_path):
     """Convert markdown file to Word document with proper formatting"""
+    from docx import Document
+    from docx.shared import Pt
     print(f"Converting {md_path.name} to DOCX...")
 
     with open(md_path, 'r', encoding='utf-8') as f:
@@ -176,6 +168,8 @@ def convert_md_to_docx(md_path, docx_path):
 
 def convert_txt_to_docx(txt_path, docx_path):
     """Convert plain text file to Word document"""
+    from docx import Document
+    from docx.shared import Pt
     print(f"Converting {txt_path.name} to DOCX...")
 
     with open(txt_path, 'r', encoding='utf-8') as f:
@@ -197,19 +191,20 @@ def convert_txt_to_docx(txt_path, docx_path):
     doc.save(docx_path)
     print(f"  Created: {docx_path.name}")
 
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Helvetica', 'B', 10)
-        self.cell(0, 10, 'TruthCert-PairwisePro - Supporting Information', align='C', new_x='LMARGIN', new_y='NEXT')
-        self.ln(5)
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Helvetica', 'I', 8)
-        self.cell(0, 10, f'Page {self.page_no()}', align='C')
-
 def convert_md_to_pdf(md_path, pdf_path):
     """Convert markdown file to PDF"""
+    from fpdf import FPDF
+
+    class PDF(FPDF):
+        def header(self):
+            self.set_font('Helvetica', 'B', 10)
+            self.cell(0, 10, 'TruthCert-PairwisePro - Supporting Information', align='C', new_x='LMARGIN', new_y='NEXT')
+            self.ln(5)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Helvetica', 'I', 8)
+            self.cell(0, 10, f'Page {self.page_no()}', align='C')
     print(f"Converting {md_path.name} to PDF...")
 
     with open(md_path, 'r', encoding='utf-8') as f:
@@ -300,19 +295,36 @@ def convert_md_to_pdf(md_path, pdf_path):
     print(f"  Created: {pdf_path.name}")
 
 def create_zip_archive(files, zip_path):
-    """Create ZIP archive from list of files"""
-    print(f"Creating ZIP archive...")
-
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for file_path in files:
-            if file_path.exists():
-                zipf.write(file_path, file_path.name)
-                print(f"  Added: {file_path.name}")
-
+    """Validate all inputs and replace the ZIP only after a complete write."""
+    files = [Path(path) for path in files]
+    zip_path = Path(zip_path)
+    if not files:
+        raise ValueError("An archive requires at least one input file")
+    names = set()
+    for source in files:
+        if not source.is_file():
+            raise FileNotFoundError(f"Archive input is missing or not a file: {source}")
+        if source.resolve() == zip_path.resolve():
+            raise ValueError("The archive cannot be one of its own inputs")
+        name = source.name.casefold()
+        if name in names:
+            raise ValueError(f"Duplicate archive member name: {source.name}")
+        names.add(name)
+    print("Creating ZIP archive...")
+    with tempfile.NamedTemporaryFile(dir=zip_path.parent, suffix=".zip.tmp", delete=False) as staged:
+        staged_path = Path(staged.name)
+    try:
+        with zipfile.ZipFile(staged_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for source in files:
+                zipf.write(source, source.name)
+        os.replace(staged_path, zip_path)
+    finally:
+        staged_path.unlink(missing_ok=True)
     print(f"  Created: {zip_path.name}")
 
 def create_placeholder_figure(fig_num, title, width_in, height_in, output_path):
     """Create a placeholder TIFF figure at 300 DPI"""
+    from PIL import Image, ImageDraw, ImageFont
     print(f"Creating Figure {fig_num}...")
 
     # Calculate pixel dimensions at 300 DPI
